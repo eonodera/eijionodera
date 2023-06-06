@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>送料分岐</title>
+</head>
+<body>
+  <form name="priceForm">
+  <label>購入金額</label>
+    <input type="text" name="priceValue">
+  </form>
+  <form name="souryoForm">
+  <label>都道府県</label>
+    <select name="pref">
+      <option value="0">都道府県選択</option>
+      <option value="hokkaido">北海道</option>
+      <option value="tohoku">東北</option>
+      <option value="kanto">関東</option>
+      <option value="toukai">東海</option>
+      <option value="kinki">近畿</option>
+      <option value="hokuriku">北陸</option>
+      <option value="kyushu">九州</option>
+      <option value="okinawa">沖縄</option>
+    </select>
+  </form>
+  <button id="submit-btn">送信する</button>
+  <script src="../JS-basic/js/test.js"></script>
+</body>
+</html>
+<script>
+const submitBtn = document.getElementById("submit-btn");
+ submitBtn.addEventListener('click', () => {
+  const price = document.forms.priceForm.priceValue.value;
+  console.log(price);
+  const shippingFee = document.forms.souryoForm.pref.value in soryo_table;
+  //ここで定義した送料テーブルの値（地域ごとの送料）を取り出したいのですが、取り出し方で躓いています。
+  console.log(shippingFee);
+  if (price >= 3980) {
+      console.log("送料無料");
+    } else {
+      console.log("価格" + price + "円" + "+ 送料" + shippingFee + "円");
+    };
+  });
+//送料テーブル
+const soryo_table = {
+  "hokkaido":[1500],
+  "tohoku":[1200],
+  "kanto":[800],
+  "toukai":[800],
+  "kinki":[800],
+  "hokuriku":[800],
+  "kyushu":[1200],
+  "okinawa":[1500]
+};
+</script>
+</HTML>
