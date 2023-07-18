@@ -1,0 +1,108 @@
+<html>
+    <head>
+        <title>タイマー</title>
+    </head>
+    <body>
+        <button type="button" id="start">START</button>
+        <button type="button" id="redo">REDO</button>
+        <button type="button" id="pause">PAUSE</button>
+        <button type="button" id="resume">RESUME</button>
+
+        <script>
+        // コンストラクタとして使用する場合は Timerはarrow function で定義してはいけない    
+        let Timer = function (callback, countdown) {
+            // 変数idとtimeは引数countdownへ
+            let id, timer = countdown;
+            // タイマー部分のHTML要素（p要素）を取得する
+            // 2重で変数を定義できない、let id, time = count.textContentが正しい？
+
+            // timerはすでに上で宣言しているので変更可能な変数への代入しか行えない
+            // 下のletで同じ変数名を宣言するようなことはできない。上のtimerへ再代入
+            // したい場合はletを取り除く
+            // let timer = 1;
+            
+            // この変数内でpauseという関数を用意、idをタイムアウトさせる
+            this.pause = () => {
+                clearTimeout(id);
+                id = null;
+            };
+
+            // この変数内でresumeという関数を用意、idを取得し値を戻させる
+            this.resume = () => {
+                if (id) {
+                    return;
+                }
+
+                // インターバルのセット
+                id = setInterval(() => {
+                // １秒ごとにマイナスする
+                timer--;
+                // タイマー部分のHTML要素（p要素）を取得する
+                
+                console.log(timer);
+                // もしゼロになったら
+                if (timer <= 0) {
+                    // gameOver関数でスコア表示
+                    //gameOver(id);
+                    // なぜここでcallbackが来るのか？
+                    callback();
+                }
+                }, 1000);
+            };
+
+            this.resume();
+        };
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const start = document.getElementById("start");
+            const redo = document.getElementById("redo");
+            const pause = document.getElementById("pause");
+            const resume = document.getElementById("resume");
+
+            // なぜここで変数timerを変数Timerに再定義してるんでしたっけ？
+            // new Timer()はTimer(関数)オブジェクトを作る場合のコンストラクタ
+            // timer変数を他の変数の別名として利用しているわけではなく、newして
+            // 作ったインスタンスを格納しておく場所
+            let timer = new Timer(() => {
+                // ここのconsole.log("done!");という記述が理解できない
+                console.log("Game over!");
+            }, 1000);
+
+            // ゲームスタート時の処理
+            start.addEventListener("click", () => {
+                // タイマーを開始する
+                Timer();
+                // ランダムな文字の表示
+                //createText();
+                // スタートボタンを非表示にする
+                start.style.display = "none";
+                // キーボードのイベント処理
+                //document.addEventListener("keypress", keyPress);
+            });
+
+            //untypedfield.textContent = "スタートボタンで開始";
+
+            // やり直し時の処理
+            redo.addEventListener("click", () =>{
+                window.location.reload();
+            });
+
+            // 中断の時の処理
+            pause.addEventListener("click", () => {
+                timer.pause();
+                // ボタンをTaggleする
+                pause.style.display = "none";
+                resume.style.display = "inline";
+            });
+
+            // 再開の時の処理
+            resume.addEventListener("click", () => {
+                timer.resume();
+                // ボタンをTaggleする
+                resume.style.display = "none";
+                pause.style.display = "inline";
+            });
+        });
+        </script>
+    </body>
+</html>

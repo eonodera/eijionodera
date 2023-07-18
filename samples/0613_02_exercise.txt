@@ -1,0 +1,148 @@
+=======Javascriptで知っておくべきこと
+https://qiita.com/yukiji/items/ae2dbbd34f8557d5af19
+https://qiita.com/soarflat/items/1a9613e023200bbebcb3
+https://qiita.com/Fendo181/items/cca476da99e8f09b6b97
+https://qiita.com/nekoneko-wanwan/items/bedc0e826c0842ca0b11
+https://qiita.com/shibukawa/items/19ab5c381bbb2e09d0d9
+https://qiita.com/39_isao/items/c00a200b158ba057363f
+https://qiita.com/katsunory/items/9bf9ee49ee5c08bf2b3d
+https://qiita.com/Yama-to/items/5e0827dfd2bd440537d0
+https://qiita.com/yoshi389111/items/245df2d642e49d2acf3a
+
+
+=======関数オブジェクトの課題
+問題1:
+以下の要件に基づいて、関数オブジェクトを作成してください。
+
+要件:
+
+関数名は"multiply"とする。
+2つの引数を受け取り、それらの数値を掛け合わせた結果を返す。
+ヒント: 関数オブジェクト内で処理を定義し、return文を使用して結果を返すこと。
+問題2:
+以下の要件に基づいて、関数オブジェクトを作成してください。
+
+要件:
+
+関数名は"counter"とする。
+関数内でカウンター変数を保持し、呼び出すたびにその値を1ずつ増やす。
+ヒント: クロージャを使用してカウンター変数を保持すること。
+問題3:
+以下の要件に基づいて、関数オブジェクトを作成してください。
+
+要件:
+
+関数名は"formatName"とする。
+1つの引数として、名前を受け取る。
+受け取った名前を「姓, 名」の形式で表示する。
+ヒント: 関数内で文字列の結合を行い、結果をコンソールに出力すること。
+
+
+=======Ajaxの課題
+課題1:
+JSONPlaceholderのAPIエンドポイントである「https://jsonplaceholder.typicode.com/posts」から、すべての投稿を取得してコンソールに出力してください。
+
+課題2:
+JSONPlaceholderのAPIエンドポイントである「https://jsonplaceholder.typicode.com/posts/1」から、IDが1の投稿を取得してコンソールに出力してください。
+
+課題3:
+JSONPlaceholderのAPIエンドポイントである「https://jsonplaceholder.typicode.com/posts」に新しい投稿を作成してください。投稿のデータは以下の通りです:
+
+json
+Copy code
+{
+  "title": "New Post",
+  "body": "This is a new post.",
+  "userId": 1
+}
+作成された投稿のレスポンスをコンソールに出力してください。
+
+
+=======bindの課題
+課題1:
+以下の要件に基づいて、bind()メソッドを使用して関数のコンテキストを固定化してください。
+
+要件:
+
+sayHelloという名前の関数を定義します。
+sayHello関数は、自分自身の名前を引数として受け取り、console.log()を使用して「Hello, 名前！」と表示します。
+sayHello関数をオブジェクトpersonにバインドして、person.sayHello()として呼び出してください。
+課題2:
+以下の要件に基づいて、bind()メソッドを使用して関数のコンテキストを固定化してください。
+
+要件:
+
+calculateという名前の関数を定義します。
+calculate関数は、2つの数値を引数として受け取り、それらの数値の合計を返します。
+calculate関数をコンテキストをnullに固定化してboundCalculateという名前の新しい関数を作成します。
+boundCalculateを呼び出して、calculate(3, 4)の結果を取得し、結果をconsole.log()で表示します。
+課題3:
+以下の要件に基づいて、bind()メソッドを使用して関数のコンテキストを固定化してください。
+
+要件:
+
+オブジェクトcarを定義します。carはmakeというプロパティを持ち、自動車のメーカー名（文字列）を値として持ちます。
+getMakeという名前の関数を定義します。この関数は、carオブジェクトのmakeプロパティの値を返します。
+getMake関数をコンテキストをcarオブジェクトに固定化してboundGetMakeという名前の新しい関数を作成します。
+boundGetMakeを呼び出して、関数の実行結果をconsole.log()で表示します。
+
+（１番の解答例）
+function sayHello(name) {
+  console.log(`Hello, ${name}!`);
+}
+
+const person = {
+  name: "Alice"
+};
+
+const sayHelloToPerson = sayHello.bind(person, person.name);
+sayHelloToPerson(); // 結果: Hello, Alice!
+この回答では、bind()メソッドを使用してsayHello関数のコンテキストをpersonオブジェクトに固定化しています。bind()メソッドの第1引数にはコンテキストとなるオブジェクトを指定し、第2引数以降には関数に渡す引数を指定します。sayHello.bind(person, person.name)によって、sayHelloToPersonという新しい関数が作成され、personオブジェクトがsayHello関数内のthisキーワードとして参照されるようになります。sayHelloToPerson()を呼び出すことで、固定化されたコンテキストを持つsayHello関数が実行され、結果がコンソールに表示されます。
+
+
+=======Promiseの課題
+課題1:
+以下の要件に基づいて、Promiseを使用して非同期処理を実装してください。
+
+要件:
+
+delayという関数を作成します。この関数は、指定されたミリ秒数だけ待機した後に解決（成功）するPromiseを返します。
+delay関数を使用して、1秒待機した後に「Hello, Promise!」とコンソールに表示する非同期処理を実行してください。
+課題2:
+以下の要件に基づいて、Promiseを使用して非同期処理を実装してください。
+
+要件:
+
+fetchDataという関数を作成します。この関数は、データを取得するための非同期処理を行い、成功時に取得したデータを解決するPromiseを返します。
+fetchData関数を使用して、URLが"https://api.example.com/data"であるデータの取得をシミュレートし、取得したデータをコンソールに表示する非同期処理を実行してください。
+課題3:
+以下の要件に基づいて、Promiseを使用して非同期処理を実装してください。
+
+要件:
+
+divideという関数を作成します。この関数は、2つの数値を引数として受け取り、第1引数を第2引数で割った結果を解決するPromiseを返します。ただし、第2引数が0の場合は、拒否（失敗）するPromiseを返します。
+divide関数を使用して、数値8を数値2で割る非同期処理を実行し、結果をコンソールに表示してください。また、数値8を数値0で割る非同期処理を実行し、エラーメッセージをコンソールに表示してください。
+
+
+=======async/awaitの課題
+課題1:
+以下の要件に基づいて、async/awaitを使用して非同期処理を実装してください。
+
+要件:
+
+getRandomNumberという関数を作成します。この関数は、0から指定された最大値までのランダムな整数を非同期に生成し、その値を解決するPromiseを返します。
+getRandomNumber関数を使用して、0から10までのランダムな整数を取得し、その結果をコンソールに表示する非同期処理を実行してください。
+課題2:
+以下の要件に基づいて、async/awaitを使用して非同期処理を実装してください。
+
+要件:
+
+fetchDataという関数を作成します。この関数は、指定されたURLからデータを非同期に取得し、取得したデータを解決するPromiseを返します。
+fetchData関数を使用して、URLが"https://api.example.com/data"であるデータの取得をシミュレートし、取得したデータをコンソールに表示する非同期処理を実行してください。
+課題3:
+以下の要件に基づいて、async/awaitを使用して非同期処理を実装してください。
+
+要件:
+
+getWeatherという関数を作成します。この関数は、指定された都市名を非同期に使って天気情報を取得し、解決するPromiseを返します。
+getWeather関数を使用して、都市名"Tokyo"を指定して天気情報を取得し、その結果をコンソールに表示する非同期処理を実行してください。
