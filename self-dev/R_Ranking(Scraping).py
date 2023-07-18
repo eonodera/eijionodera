@@ -132,9 +132,14 @@ for category in categories:
         pass
 
     # Excelの最終行を取得＆情報の追記＆ヘッダー項目の非表示
-    # TODO: もしrow_numが1以上だったらヘッダーをFalseにするというコードを追加
-    with pd.ExcelWriter("venv\Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
-        df.to_excel(writer, sheet_name=category, startrow=row_num+1, header=True)
+    # TODO: もしrow_numが0だったらヘッダーをTrue, startrowを0
+    if row_num == 0:
+        with pd.ExcelWriter("venv\Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
+            df.to_excel(writer, sheet_name=category, startrow=0, header=True)
+
+    else:
+        with pd.ExcelWriter("venv\Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
+            df.to_excel(writer, sheet_name=category, startrow=row_num+1, header=False)
 
 
 # TODO:データ取得日をcolumn:Bに追記する
