@@ -109,30 +109,45 @@ for category in categories:
     df = pd.DataFrame(categories_rank_items[category])
     #print(df)
 
-    # TODO: ループ毎に「カテゴリID」をシート名にしたシートを作成する
-    # TODO:条件分岐 - もしExcelが存在していたら
-    if os.path.exists("venv\Python-SelfDev\R_Ranking_Daily.xlsx"):
+    # TODO:Excelが存在しているか確認
+    if not os.path.exists("venv\Python-SelfDev\R_Ranking_Daily.xlsx"):
+        # 無ければExcelを作成
+        wb = Workbook()
+        wb.save("venv\Python-SelfDev\R_Ranking_Daily.xlsx")
+
+    # 最終行を取得するための変数: defaltを0にセット
+    row_num = 0
+
+    # Excel、sheet(カテゴリID)が存在していれば
+    try:
         df2 = pd.read_excel("venv\Python-SelfDev\R_Ranking_Daily.xlsx", sheet_name=category)
-        row_num = len(df)
-        
-        # Excelの最終行を取得＆情報の追記＆ヘッダー項目の非表示
-        with pd.ExcelWriter("venv\Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
-            df.to_excel(writer, sheet_name=category, startrow=row_num+1, header=False)
+        # 最終行を取得する
+        row_num = len(df2)
+        # # デバッグ：カテゴリIDのシートと最終行が取得できてるか
+        # print(category)
+        # print(row_num)
+    
+    # もしエラーがでたら何もしない処理
+    except ValueError as _:
+        pass
 
-    # 存在していなかったら
-    else:
-        # Excelの作成＆データの書き出し
-        with pd.ExcelWriter("venv\Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl") as writer:
-            df.to_excel(writer, sheet_name=category)
+    # Excelの最終行を取得＆情報の追記＆ヘッダー項目の非表示
+    # TODO: もしrow_numが1以上だったらヘッダーをFalseにするというコードを追加
+    with pd.ExcelWriter("venv\Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
+        df.to_excel(writer, sheet_name=category, startrow=row_num+1, header=True)
 
 
-# TODO:カテゴリID(column:A)と取得日(column:B)をカラムとして追加する
+# TODO:データ取得日をcolumn:Bに追記する
 
-# TODO:カテゴリID毎にシートを作成し、プログラムを実行する度にデータを一番下に蓄積させていく
+"""
+*******************
+ここからはMySQLにデータを蓄積させる為のコードを書く
+*******************
+"""
 
 # TODO: MySQLにデータとして格納していく
 
 # TODO: MySQLのデータにアクセスしてExcelに抽出する/Pandas? 
 
-# TODO: 装飾する/Openpyxl?
+# TODO: 装飾する/Openpyxl or 関数
 
