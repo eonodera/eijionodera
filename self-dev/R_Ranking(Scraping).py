@@ -11,7 +11,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from bs4 import BeautifulSoup
 
 # TODO:ランキングを抽出したいカテゴリ番号をリスト化する
-categories = ["215783", "100554"] # 215783日用品雑貨 100554生活雑貨
+categories = ["215783", "100554", "100901"] # 215783日用品雑貨 100554生活雑貨 100901文房具・事務用品
 
 # TODO:
 categories_rank_items = {}
@@ -25,7 +25,7 @@ for category in categories:
     index = 0
 
     # TODO:(ループ) Daily Ranking 上位5件まで
-    while index < 3:
+    while index < 10:
 
         # TODO:配列からカテゴリ番号を取り出してURLに格納
         pre_url = "https://ranking.rakuten.co.jp/daily/category/"
@@ -33,19 +33,21 @@ for category in categories:
         url = pre_url.replace("category", category)
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
+        today = datetime.date.today()
         #print(url)
 
         try:
-            # 取得したい情報を持っているClassのタグを.find_allメソッドで抽出
+            # TODO: 取得したい情報を持っているClassのタグを.find_allメソッドで抽出
             # タグがリストの中に格納される
             # find_allすると全件取得してしまう為、limitで制限をかける
-            elem = soup.find_all("div", class_="rnkRanking_itemName", limit=3)
-            elem_img = soup.find_all("div", class_="rnkRanking_imageBox", limit=3)
-            elem_review = soup.find_all("div", class_="rnkRanking_starBox", limit=3)
-            elem_shop = soup.find_all("div", class_="rnkRanking_shop", limit=3)
-            elem_price = soup.find_all("div", class_="rnkRanking_price", limit=3)
-            #print(elem_shop)
-            #print(type(elem))
+            elem = soup.find_all("div", class_="rnkRanking_itemName", limit=10)
+            elem_img = soup.find_all("div", class_="rnkRanking_imageBox", limit=10)
+            elem_review = soup.find_all("div", class_="rnkRanking_starBox", limit=10)
+            elem_shop = soup.find_all("div", class_="rnkRanking_shop", limit=10)
+            elem_price = soup.find_all("div", class_="rnkRanking_price", limit=10)
+            # print(category)
+            # print(elem_review)
+            # print(type(elem))
 
             # リストの中にdivタグが全て入ってしまう為、一旦リストから取り出す処理
             # bs4.element.ResultSetは.contentsなどのメソッドが使えない
@@ -56,9 +58,11 @@ for category in categories:
             unpack_review = elem_review[index]
             unpack_shop = elem_shop[index]
             unpack_price = elem_price[index]
-            #print(unpack_title)
+            # print(index)
+            # print(category)
+            # print(unpack_review)
 
-            # 取得したい内容を指定(「aタグの後ろ」とか)
+            # TODO: 取得したい内容を指定(「aタグの後ろ」とか)
             title = unpack_title.a.contents
             item_link = unpack_item_link.a.attrs["href"]
             item_img = unpack_item_img.img.attrs["src"]
@@ -68,7 +72,10 @@ for category in categories:
             shop_link = unpack_shop.a.attrs["href"]
             item_price = unpack_price.contents
 
-            # # デバッグ
+            # TODO: 取得したデータを加工x,xxx円(str)=>xxxx(int)
+
+            # デバッグ
+            # print(category)
             # print(title)
             # print(item_link)
             # print(item_img)
@@ -80,6 +87,7 @@ for category in categories:
 
             # Dictの形式でitem_infoに格納
             item_info = {
+                "date" : today,
                 "title" : title,
                 "item_link": item_link,
                 "item_img" : item_img,
@@ -99,9 +107,27 @@ for category in categories:
             index += 1
 
         except AttributeError as _:
-            break
+            item_review = "n/a" 
+            item_review_link = "n/a" 
 
-    # rank_itemsは次のループで消えてしまう為、rank_itemsをcategories_rank_itemsとして保管
+            item_info = {
+                "date" : today,
+                "title" : title,
+                "item_link": item_link,
+                "item_img" : item_img,
+                "item_review" : item_review,
+                "item_review_link" : item_review_link,
+                "shop" : shop,
+                "shop_link" : shop_link,
+                "item_price" : item_price,
+            }
+
+            rank_items.append(item_info)
+
+            index += 1
+            continue
+
+    # TODO: rank_itemsは次のループで消えてしまう為、rank_itemsをcategories_rank_itemsとして保管
     categories_rank_items[category] = rank_items
     # print(categories_rank_items[category])
 
@@ -110,17 +136,17 @@ for category in categories:
     #print(df)
 
     # TODO:Excelが存在しているか確認
-    if not os.path.exists("venv\Python-SelfDev\R_Ranking_Daily.xlsx"):
+    if not os.path.exists("Python-SelfDev\R_Ranking_Daily.xlsx"):
         # 無ければExcelを作成
         wb = Workbook()
-        wb.save("venv\Python-SelfDev\R_Ranking_Daily.xlsx")
+        wb.save("Python-SelfDev\R_Ranking_Daily.xlsx")
 
     # 最終行を取得するための変数: defaltを0にセット
     row_num = 0
 
     # Excel、sheet(カテゴリID)が存在していれば
     try:
-        df2 = pd.read_excel("venv\Python-SelfDev\R_Ranking_Daily.xlsx", sheet_name=category)
+        df2 = pd.read_excel("Python-SelfDev\R_Ranking_Daily.xlsx", sheet_name=category)
         # 最終行を取得する
         row_num = len(df2)
         # # デバッグ：カテゴリIDのシートと最終行が取得できてるか
@@ -134,15 +160,13 @@ for category in categories:
     # Excelの最終行を取得＆情報の追記＆ヘッダー項目の非表示
     # TODO: もしrow_numが0だったらヘッダーをTrue, startrowを0
     if row_num == 0:
-        with pd.ExcelWriter("venv\Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
+        with pd.ExcelWriter("Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
             df.to_excel(writer, sheet_name=category, startrow=0, header=True)
 
     else:
-        with pd.ExcelWriter("venv\Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
+        with pd.ExcelWriter("Python-SelfDev\R_Ranking_Daily.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
             df.to_excel(writer, sheet_name=category, startrow=row_num+1, header=False)
 
-
-# TODO:データ取得日をcolumn:Bに追記する
 
 """
 *******************
