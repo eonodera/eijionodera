@@ -4,13 +4,15 @@ import openpyxl
 import pandas as pd
 import os
 import datetime
+import urllib3
 
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from bs4 import BeautifulSoup
+from lxml import html
 
 # TODO:情報を抽出したいASINをリスト化する
-asins = ["B089VMCSC2"] #HMB-bulksports "B094J9M6Z5", , EAA-bulksports
+asins = ["B094J9M6Z5", "B089VMCSC2"] #HMB-bulksports, EAA-bulksports
 
 # TODO:
 asins_rank_items = {}
@@ -28,6 +30,7 @@ for asin in asins:
     url = pre_url.replace("product_asin", asin)
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
+    lxml = html.fromstring(str(soup))
     today = datetime.date.today()
     print(url)
     print(response)
@@ -35,68 +38,41 @@ for asin in asins:
     try:
         # TODO: 取得したい情報を持っているClassのタグを.find_allメソッドで抽出
         # タグがリストの中に格納される
-        asin_title = soup.find_all("span", id="productTitle")
-        asin_base_price = soup.find_all("span", id="sns-base-price")
-        asin_tiered_price = soup.find_all("span", id="sns-tiered-price")
-        asin_store = soup.find_all("a", id="bylineInfo")
-        asin_review = soup.find_all("span", id="acrPopover")
-        asin_eval = soup.find_all("span", id="acrCustomerReviewText")
-        asin_badge_1 = soup.find_all("span", class_="ac-badge-text-primary ac-white")
-        asin_badge_2 = soup.find_all("span", class_="ac-badge-text-secondary ac-orange")
-
-        # デバッグ / 使用後コメントアウト
-        print(asin_title)
-        print(asin_base_price)
-        print(asin_tiered_price)
-        print(asin_store)
-        print(asin_review)
-        print(asin_eval)
-        print(asin_badge_1)
-        print(asin_badge_2)
-
-        # リストの中にdivタグが全て入ってしまう為、一旦リストから取り出す処理
-        # bs4.element.ResultSetは.contentsなどのメソッドが使えない
-        # indexを活用し、リストの上から〇番目というループを作成している
-        unpack_title = asin_title
-        unpack_base_price = asin_base_price
-        unpack_tiered_price = asin_tiered_price
-        unpack_store = asin_store
-        unpack_store_link = asin_store
-        unpack_asin_review = asin_review
-        unpack_asin_eval = asin_eval
-        unpack_asin_badge_1 = asin_badge_1
-        unpack_asin_badge_2 = asin_badge_2
-
-        # デバッグ / 使用後コメントアウト
-        print(unpack_title)
-        print(unpack_base_price)
-        print(unpack_tiered_price)
-        print(unpack_store)
-        print(unpack_store_link)
-        print(unpack_asin_review)
-        print(unpack_asin_eval)
-        print(unpack_asin_badge_1)
-        print(unpack_asin_badge_2)
+        asin_title = soup.find("span", attrs={"id": "productTitle"})
+        asin_base_price = lxml.xpath("//*[@id='sns-base-price']/text()") # soup.find("span", attrs={"id": "sns-base-price"})
+        asin_tiered_price = lxml.xpath("//*[@id='sns-tiered-price']/text()") # soup.find("span", attrs={"id": "sns-tiered-price"})
+        asin_store = soup.find("a", attrs={"id": "bylineInfo"})
+        asin_review = soup.find("span", attrs={"id": "acrPopover"})
+        asin_eval = soup.find("span", attrs={"id": "acrCustomerReviewText"})
+        asin_badge_1 = soup.find("span", attrs={"class": "ac-badge-text-primary"})
+        asin_badge_2 = soup.find("span", attrs={"class": "ac-badge-text-secondary"})
 
         # TODO: 取得したい内容を指定(「aタグの後ろ」とか)
-        title = unpack_title.contents
-        base_price = unpack_base_price.contents
-        tiered_price = unpack_tiered_price.contents
-        store = unpack_store.contents
-        store_link = unpack_store_link.attrs["href"]
-        review = unpack_asin_review.a.span.contents
-        evaluation = unpack_asin_eval.contents
-        badge_1 = unpack_asin_badge_1.contents
-        badge_2 = unpack_asin_badge_2.contents
+        title = asin_title.text
+        base_price = asin_base_price
+        tiered_price = asin_tiered_price
+        store = asin_store.text
+        review = asin_review.a.span.text
+        evaluation = asin_eval.text
+        badge_1 = asin_badge_1.text
+        badge_2 = asin_badge_2.text
 
-        # TODO: 取得したデータを加工x,xxx円(str)=>xxxx(int)
+        # unpack_title = title[0]
+        unpack_base_price = base_price[0]
+        unpack_tiered_price = tiered_price[0]
+
+        # TODO: 正規表現で空白の削除
+        title_re = re.sub(r'\s+', '', title)
+        base_price_re = re.sub(r'\s+', '', unpack_base_price)
+        tiered_price_re = re.sub(r'\s+', '', unpack_tiered_price)
+
+        # TODO: 取得したデータを加工x,xxx円(str)=>xxxx(int)        
 
         # デバッグ / 使用後コメントアウト
-        print(title)
-        print(base_price)
-        print(tiered_price)
+        print(title_re)
+        print(base_price_re)
+        print(tiered_price_re)
         print(store)
-        print(store_link)
         print(review)
         print(evaluation)
         print(badge_1)
@@ -105,11 +81,10 @@ for asin in asins:
         # Dictの形式でitem_infoに格納
         asin_info = {
         "date" : today,
-        "product_title" : title,
-        "base_price": base_price,
-        "tiered_price" : tiered_price,
+        "product_title" : title_re,
+        "base_price": base_price_re,
+        "tiered_price" : tiered_price_re,
         "store" : store,
-        "store_link" : store_link,
         "review" : review,
         "evaluation" : evaluation,
         "badge_1" : badge_1,
@@ -134,7 +109,7 @@ for asin in asins:
         "base_price": base_price,
         "tiered_price" : tiered_price,
         "store" : store,
-        "store_link" : store_link,
+        # "store_link" : store_link,
         "review" : review,
         "evaluation" : evaluation,
         "badge_1" : badge_1,
